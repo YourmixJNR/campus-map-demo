@@ -1,44 +1,41 @@
-// import { useState } from "react";
-// import reactLogo from "./assets/react.svg";
-// import viteLogo from "/vite.svg";
-import "./App.css";
+import React, { useRef, useEffect } from "react";
+import WebScene from "@arcgis/core/WebScene";
+import SceneView from "@arcgis/core/views/SceneView";
+import esriConfig from "@arcgis/core/config";
+import { PORTAL_URL, SCENE_ID } from "./config/env";
 
 function App() {
-  // const [count, setCount] = useState(0);
-  document
-    .querySelector("arcgis-map")
-    .addEventListener("arcgisViewReadyChange", (event) => {
-      /**
-       * Get a reference to the `WebMap`
-       * from the `event.detail` object.
-       */
-      const { map } = event.detail;
-      // Add more functionality here.
-    });
-  return (
-    <>
-      {/* <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p> */}
-    </>
-  );
+  const sceneDiv = useRef(null);
+
+  useEffect(() => {
+    //  portal URL
+    esriConfig.portalUrl = PORTAL_URL;
+
+    if (sceneDiv.current) {
+      const webscene = new WebScene({
+        portalItem: {
+          id: SCENE_ID,
+        },
+      });
+
+      const view = new SceneView({
+        container: sceneDiv.current,
+        map: webscene,
+      });
+
+      // additional config
+      view.when(() => {
+        console.log("Web Scene loaded successfully");
+      });
+
+      // cleanup function
+      return () => {
+        view.destroy();
+      };
+    }
+  }, []);
+
+  return <div ref={sceneDiv} style={{ height: "100vh", width: "100%" }}></div>;
 }
 
 export default App;
